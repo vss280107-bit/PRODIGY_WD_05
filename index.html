@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nimbus — Weather Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Video Background ── -->
+  <div class="video-bg" id="videoBg">
+    <video id="bgVideo" autoplay muted loop playsinline>
+      <source id="bgVideoSrc" src="" type="video/mp4" />
+    </video>
+    <div class="video-overlay"></div>
+  </div>
+
+  <!-- ── Loading Screen ── -->
+  <div class="loader-screen" id="loaderScreen">
+    <div class="loader-inner">
+      <div class="loader-ring"></div>
+      <p class="loader-text">Reading the skies…</p>
+    </div>
+  </div>
+
+  <!-- ── App Shell ── -->
+  <div class="app" id="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">☁</span>
+        <span class="logo-text">Nimbus</span>
+      </div>
+
+      <div class="header-actions">
+        <!-- Theme toggle -->
+        <button class="icon-btn" id="themeToggle" title="Toggle light/dark">
+          <span id="themeIcon">☀</span>
+        </button>
+        <!-- Refresh -->
+        <button class="icon-btn" id="refreshBtn" title="Refresh weather">
+          <span>↻</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search Bar -->
+    <section class="search-section">
+      <div class="search-wrapper">
+        <div class="search-bar">
+          <span class="search-icon">⌕</span>
+          <input
+            type="text"
+            id="cityInput"
+            class="search-input"
+            placeholder="Search any city…"
+            autocomplete="off"
+          />
+          <button class="search-btn" id="searchBtn">Search</button>
+        </div>
+        <button class="locate-btn" id="locateBtn" title="Use my location">
+          <span>◎</span> My Location
+        </button>
+      </div>
+
+      <!-- Recent Searches -->
+      <div class="recent-searches" id="recentSearches"></div>
+
+      <!-- Error Message -->
+      <div class="error-msg" id="errorMsg"></div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent" style="display:none">
+
+      <!-- Hero Weather Card -->
+      <section class="hero-card glass-card">
+        <div class="hero-left">
+          <div class="hero-location">
+            <span class="city-name" id="cityName">—</span>
+            <span class="country-name" id="countryName">—</span>
+          </div>
+          <div class="hero-temp">
+            <span class="temp-value" id="tempValue">—</span>
+            <div class="temp-toggle">
+              <button class="unit-btn active" id="btnCelsius">°C</button>
+              <button class="unit-btn" id="btnFahrenheit">°F</button>
+            </div>
+          </div>
+          <div class="hero-condition">
+            <span class="condition-text" id="conditionText">—</span>
+          </div>
+          <div class="hero-feels">
+            Feels like <span id="feelsLike">—</span>
+          </div>
+          <div class="last-updated" id="lastUpdated">—</div>
+        </div>
+
+        <div class="hero-right">
+          <div class="weather-icon-wrap">
+            <img id="weatherIcon" src="" alt="weather icon" class="weather-icon" />
+            <div class="icon-glow"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Metrics Grid -->
+      <section class="metrics-grid">
+        <div class="metric-card glass-card">
+          <div class="metric-icon">💧</div>
+          <div class="metric-label">Humidity</div>
+          <div class="metric-value" id="humidity">—</div>
+          <div class="metric-bar"><div class="metric-bar-fill" id="humidityBar"></div></div>
+        </div>
+        <div class="metric-card glass-card">
+          <div class="metric-icon">💨</div>
+          <div class="metric-label">Wind Speed</div>
+          <div class="metric-value" id="windSpeed">—</div>
+        </div>
+        <div class="metric-card glass-card">
+          <div class="metric-icon">🌡</div>
+          <div class="metric-label">Pressure</div>
+          <div class="metric-value" id="pressure">—</div>
+        </div>
+        <div class="metric-card glass-card">
+          <div class="metric-icon">👁</div>
+          <div class="metric-label">Visibility</div>
+          <div class="metric-value" id="visibility">—</div>
+        </div>
+        <div class="metric-card glass-card">
+          <div class="metric-icon">🌅</div>
+          <div class="metric-label">Sunrise</div>
+          <div class="metric-value" id="sunrise">—</div>
+        </div>
+        <div class="metric-card glass-card">
+          <div class="metric-icon">🌇</div>
+          <div class="metric-label">Sunset</div>
+          <div class="metric-value" id="sunset">—</div>
+        </div>
+      </section>
+
+      <!-- AQI Card -->
+      <section class="aqi-section glass-card" id="aqiSection">
+        <h3 class="section-title">Air Quality Index</h3>
+        <div class="aqi-content">
+          <div class="aqi-gauge-wrap">
+            <div class="aqi-gauge" id="aqiGauge">
+              <div class="aqi-needle" id="aqiNeedle"></div>
+              <span class="aqi-number" id="aqiNumber">—</span>
+            </div>
+          </div>
+          <div class="aqi-details">
+            <div class="aqi-label" id="aqiLabel">—</div>
+            <div class="aqi-components" id="aqiComponents"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hourly Forecast Chart -->
+      <section class="chart-section glass-card">
+        <h3 class="section-title">Hourly Forecast</h3>
+        <div class="chart-wrap">
+          <canvas id="hourlyChart"></canvas>
+        </div>
+      </section>
+
+      <!-- 5-Day Forecast -->
+      <section class="forecast-section">
+        <h3 class="section-title">5-Day Forecast</h3>
+        <div class="forecast-grid" id="forecastGrid"></div>
+      </section>
+
+      <!-- Favorites -->
+      <section class="favorites-section glass-card" id="favoritesSection">
+        <h3 class="section-title">⭐ Favorite Cities</h3>
+        <div class="favorites-list" id="favoritesList"></div>
+        <button class="add-fav-btn" id="addFavBtn">+ Add Current City</button>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      Data via OpenWeatherMap · Auto-refreshes every 10 min
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
